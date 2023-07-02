@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS SalesCustomer (
+    CustomerID INT NOT NULL,
+    PersonID INT,
+    StoreID INT,
+    TerritoryID INT,
+    AccountNumber VARCHAR(10),
+    rowguid VARCHAR(36),
+    ModifiedDate TIMESTAMP,
+PRIMARY KEY (CustomerID),
+FOREIGN KEY (PersonID) REFERENCES Person (BusinessEntityID)
+);
