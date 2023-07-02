@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS SalesSpecialOfferProduct (
+    SpecialOfferID INT NOT NULL,
+    ProductID INT NOT NULL,
+    rowguid VARCHAR(36),
+    ModifiedDate TIMESTAMP,
+PRIMARY KEY (SpecialOfferID, ProductID),
+FOREIGN KEY (ProductID) REFERENCES ProductionProduct(ProductID)
+);
