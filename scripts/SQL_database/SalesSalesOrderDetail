@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS SalesSalesOrderDetail (
+    SalesOrderID INT NOT NULL,
+    SalesOrderDetailID INT NOT NULL,
+    CarrierTrackingNumber VARCHAR(12),
+    OrderQty INT,
+    ProductID INT,
+    SpecialOfferID INT,
+    UnitPrice FLOAT,
+    UnitPriceDiscount FLOAT,
+    LineTotal FLOAT,
+    rowguid VARCHAR(36),
+    ModifiedDate TIMESTAMP,
+PRIMARY KEY (SalesOrderID, SalesOrderDetailID),
+FOREIGN KEY (SalesOrderID) REFERENCES SalesSalesOrderHeader(SalesOrderID),
+FOREIGN KEY (SpecialOfferID, ProductID) REFERENCES SalesSpecialOfferProduct(SpecialOfferID, ProductID)
+);
