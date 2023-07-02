@@ -1,0 +1,48 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue import DynamicFrame
+
+
+def sparkSqlQuery(glueContext, query, mapping, transformation_ctx) -> DynamicFrame:
+    for alias, frame in mapping.items():
+        frame.toDF().createOrReplaceTempView(alias)
+    result = spark.sql(query)
+    return DynamicFrame.fromDF(result, glueContext, transformation_ctx)
+
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Script generated for node SalesOrderDetail
+SalesOrderDetail_node1688339501072 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_salesorderdetail_csv",
+    transformation_ctx="SalesOrderDetail_node1688339501072",
+)
+
+# Script generated for node analise1
+SqlQuery0 = """
+SELECT COUNT(*) AS TotalLinhas
+FROM (
+    SELECT SalesOrderID, COUNT(*) AS Quantidade
+    FROM SalesOrderDetail
+    GROUP BY SalesOrderID
+    HAVING COUNT(*) >= 3
+) AS TabelaFiltrada;
+"""
+analise1_node1688339529697 = sparkSqlQuery(
+    glueContext,
+    query=SqlQuery0,
+    mapping={"myDataSource": SalesOrderDetail_node1688339501072},
+    transformation_ctx="analise1_node1688339529697",
+)
+
+job.commit()
