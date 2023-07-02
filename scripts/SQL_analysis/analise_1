@@ -1,0 +1,7 @@
+SELECT COUNT(*) AS TotalLinhas
+FROM (
+    SELECT SalesOrderID, COUNT(*) AS Quantidade
+    FROM SalesOrderDetail
+    GROUP BY SalesOrderID
+    HAVING COUNT(*) >= 3
+) AS TabelaFiltrada;
