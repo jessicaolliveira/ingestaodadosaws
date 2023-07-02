@@ -1,0 +1,49 @@
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Script generated for node Person
+Person_node1688327868595 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="person_person_csv",
+    transformation_ctx="Person_node1688327868595",
+)
+
+# Script generated for node SalesCustomer
+SalesCustomer_node1688328188248 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_customer_csv",
+    transformation_ctx="SalesCustomer_node1688328188248",
+)
+
+# Script generated for node Renamed keys for Nomes de clientes e uma contagem de pedidos efetuados
+RenamedkeysforNomesdeclienteseumacontagemdepedidosefetuados_node1688328517829 = ApplyMapping.apply(
+    frame=SalesCustomer_node1688328188248,
+    mappings=[
+        ("customerid", "long", "right_customerid", "long"),
+        ("personid", "long", "right_personid", "long"),
+        ("storeid", "long", "right_storeid", "long"),
+        ("territoryid", "long", "right_territoryid", "long"),
+        ("accountnumber", "string", "right_accountnumber", "string"),
+        ("rowguid", "string", "right_rowguid", "string"),
+        ("modifieddate", "string", "right_modifieddate", "string"),
+    ],
+    transformation_ctx="RenamedkeysforNomesdeclienteseumacontagemdepedidosefetuados_node1688328517829",
+)
+
+# Script generated for node Nomes de clientes e uma contagem de pedidos efetuados
+Nomesdeclienteseumacontagemdepedidosefetuados_node1688328431975 = Join.apply(
+    frame1=Person_node1688327868595,
+    frame2=RenamedkeysforNomesdeclienteseumacontagemdepedidosefetuados_node1688328517829,
+    keys1=["businessentityid"],
+    keys2=["right_customerid"],
+    transformation_ctx="Nomesdeclienteseumacontagemdepedidosefetuados_node1688328431975",
+)
+
+job.commit()
