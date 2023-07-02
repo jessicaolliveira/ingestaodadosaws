@@ -1,0 +1,16 @@
+CREATE TABLE IF NOT EXISTS Person (
+	BusinessEntityID INT NOT NULL,
+	PersonType VARCHAR(2),
+	NameStyle INT,
+	Title VARCHAR(4),
+	FirstName VARCHAR(4),
+	MiddleName VARCHAR(16),
+	LastName VARCHAR(22),
+	Suffix VARCHAR(3),
+	EmailPromotion INT,
+	AdditionalContactInfo VARCHAR(1611),
+	Demographics VARCHAR(623),
+	rowguid UUID,
+	ModifiedDate TIMESTAMP,
+PRIMARY KEY (BusinessEntityID)
+);
