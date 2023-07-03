@@ -1,0 +1,46 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue import DynamicFrame
+
+
+def sparkSqlQuery(glueContext, query, mapping, transformation_ctx) -> DynamicFrame:
+    for alias, frame in mapping.items():
+        frame.toDF().createOrReplaceTempView(alias)
+    result = spark.sql(query)
+    return DynamicFrame.fromDF(result, glueContext, transformation_ctx)
+
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Script generated for node SalesOrderHeader
+SalesOrderHeader_node1688344208237 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_salesorderheader_csv",
+    transformation_ctx="SalesOrderHeader_node1688344208237",
+)
+
+# Script generated for node SQL Query
+SqlQuery0 = """
+SELECT SalesOrderID, OrderDate, FORMAT(TotalDue, 'R$0.00') AS TotalDue
+FROM SalesSalesOrderHeader
+WHERE YEAR(OrderDate) = 2011 AND MONTH(OrderDate) = 9
+    AND TotalDue > 1000
+ORDER BY TotalDue DESC;
+"""
+SQLQuery_node1688344257608 = sparkSqlQuery(
+    glueContext,
+    query=SqlQuery0,
+    mapping={"myDataSource": SalesOrderHeader_node1688344208237},
+    transformation_ctx="SQLQuery_node1688344257608",
+)
+
+job.commit()
