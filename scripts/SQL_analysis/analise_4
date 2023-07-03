@@ -1,0 +1,6 @@
+SELECT d.ProductID, h.OrderDate, SUM(d.OrderQty) AS TotalOrderQty
+FROM SalesSalesOrderHeader h
+INNER JOIN SalesSalesOrderDetail d ON h.SalesOrderID = d.SalesOrderID
+INNER JOIN ProductionProduct p ON d.ProductID = p.ProductID
+GROUP BY d.ProductID, h.OrderDate
+ORDER BY TotalOrderQty DESC;
