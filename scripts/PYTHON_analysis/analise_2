@@ -1,0 +1,72 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue import DynamicFrame
+
+
+def sparkSqlQuery(glueContext, query, mapping, transformation_ctx) -> DynamicFrame:
+    for alias, frame in mapping.items():
+        frame.toDF().createOrReplaceTempView(alias)
+    result = spark.sql(query)
+    return DynamicFrame.fromDF(result, glueContext, transformation_ctx)
+
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Script generated for node SalesOrderDetail
+SalesOrderDetail_node1688342964989 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_salesorderdetail_csv",
+    transformation_ctx="SalesOrderDetail_node1688342964989",
+)
+
+# Script generated for node SalesOfferProduct
+SalesOfferProduct_node1688342993479 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_specialofferproduct_csv",
+    transformation_ctx="SalesOfferProduct_node1688342993479",
+)
+
+# Script generated for node ProductionProduct
+ProductionProduct_node1688343024759 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="production_product_csv",
+    transformation_ctx="ProductionProduct_node1688343024759",
+)
+
+# Script generated for node analise2
+SqlQuery0 = """
+SELECT TOP 3
+    pp.Name AS ProductName,
+    SUM(od.OrderQty) AS TotalQuantitySold,
+    pp.DaysToManufacture
+FROM
+    SalesSpecialOfferProduct sp
+    INNER JOIN SalesSalesOrderDetail od ON sp.ProductID = od.ProductID
+    INNER JOIN ProductionProduct pp ON sp.ProductID = pp.ProductID
+GROUP BY
+    pp.Name,
+    pp.DaysToManufacture
+ORDER BY
+    SUM(od.OrderQty) DESC;
+"""
+analise2_node1688343061670 = sparkSqlQuery(
+    glueContext,
+    query=SqlQuery0,
+    mapping={
+        "myDataSource": SalesOrderDetail_node1688342964989,
+        "myDataSource": ProductionProduct_node1688343024759,
+        "myDataSource": SalesOfferProduct_node1688342993479,
+    },
+    transformation_ctx="analise2_node1688343061670",
+)
+
+job.commit()
