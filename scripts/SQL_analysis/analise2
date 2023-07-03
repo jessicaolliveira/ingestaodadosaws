@@ -1,0 +1,13 @@
+SELECT TOP 3
+    pp.Name AS ProductName,
+    SUM(od.OrderQty) AS TotalQuantitySold,
+    pp.DaysToManufacture
+FROM
+    SalesSpecialOfferProduct sp
+    INNER JOIN SalesSalesOrderDetail od ON sp.ProductID = od.ProductID
+    INNER JOIN ProductionProduct pp ON sp.ProductID = pp.ProductID
+GROUP BY
+    pp.Name,
+    pp.DaysToManufacture
+ORDER BY
+    SUM(od.OrderQty) DESC;
