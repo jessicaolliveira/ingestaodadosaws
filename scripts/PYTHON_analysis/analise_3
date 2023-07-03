@@ -4,6 +4,15 @@ from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
+from awsglue import DynamicFrame
+
+
+def sparkSqlQuery(glueContext, query, mapping, transformation_ctx) -> DynamicFrame:
+    for alias, frame in mapping.items():
+        frame.toDF().createOrReplaceTempView(alias)
+    result = spark.sql(query)
+    return DynamicFrame.fromDF(result, glueContext, transformation_ctx)
+
 
 args = getResolvedOptions(sys.argv, ["JOB_NAME"])
 sc = SparkContext()
@@ -13,41 +22,46 @@ job = Job(glueContext)
 job.init(args["JOB_NAME"], args)
 
 # Script generated for node Person
-Person_node1688327868595 = glueContext.create_dynamic_frame.from_catalog(
+Person_node1688336424501 = glueContext.create_dynamic_frame.from_catalog(
     database="brutos_caserox",
     table_name="person_person_csv",
-    transformation_ctx="Person_node1688327868595",
+    transformation_ctx="Person_node1688336424501",
+)
+
+# Script generated for node SalesSalesOrderHeader
+SalesSalesOrderHeader_node1688339320812 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_salesorderheader_csv",
+    transformation_ctx="SalesSalesOrderHeader_node1688339320812",
 )
 
 # Script generated for node SalesCustomer
-SalesCustomer_node1688328188248 = glueContext.create_dynamic_frame.from_catalog(
+SalesCustomer_node1688337910133 = glueContext.create_dynamic_frame.from_catalog(
     database="brutos_caserox",
     table_name="sales_customer_csv",
-    transformation_ctx="SalesCustomer_node1688328188248",
+    transformation_ctx="SalesCustomer_node1688337910133",
 )
 
-# Script generated for node Renamed keys for Nomes de clientes e uma contagem de pedidos efetuados
-RenamedkeysforNomesdeclienteseumacontagemdepedidosefetuados_node1688328517829 = ApplyMapping.apply(
-    frame=SalesCustomer_node1688328188248,
-    mappings=[
-        ("customerid", "long", "right_customerid", "long"),
-        ("personid", "long", "right_personid", "long"),
-        ("storeid", "long", "right_storeid", "long"),
-        ("territoryid", "long", "right_territoryid", "long"),
-        ("accountnumber", "string", "right_accountnumber", "string"),
-        ("rowguid", "string", "right_rowguid", "string"),
-        ("modifieddate", "string", "right_modifieddate", "string"),
-    ],
-    transformation_ctx="RenamedkeysforNomesdeclienteseumacontagemdepedidosefetuados_node1688328517829",
+# Script generated for node SQL Query
+SqlQuery0 = """
+SELECT p.FirstName + ' ' + p.LastName AS CustomerName, COUNT(soh.SalesOrderID) AS OrderCount
+FROM Person p
+INNER JOIN SalesCustomer c ON p.BusinessEntityID = c.CustomerID
+INNER JOIN SalesSalesOrderHeader soh ON c.CustomerID = soh.CustomerID
+GROUP BY p.FirstName, p.LastName;
+"""
+SQLQuery_node1688338759786 = sparkSqlQuery(
+    glueContext,
+    query=SqlQuery0,
+    mapping={
+        "myDataSource": Person_node1688336424501,
+        "myDataSource": SalesCustomer_node1688337910133,
+        "myDataSource": SalesSalesOrderHeader_node1688339320812,
+    },
+    transformation_ctx="SQLQuery_node1688338759786",
 )
 
-# Script generated for node Nomes de clientes e uma contagem de pedidos efetuados
-Nomesdeclienteseumacontagemdepedidosefetuados_node1688328431975 = Join.apply(
-    frame1=Person_node1688327868595,
-    frame2=RenamedkeysforNomesdeclienteseumacontagemdepedidosefetuados_node1688328517829,
-    keys1=["businessentityid"],
-    keys2=["right_customerid"],
-    transformation_ctx="Nomesdeclienteseumacontagemdepedidosefetuados_node1688328431975",
-)
+job.commit()
+
 
 job.commit()
