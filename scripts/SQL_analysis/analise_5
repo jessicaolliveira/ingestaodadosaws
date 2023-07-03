@@ -1,0 +1,5 @@
+SELECT SalesOrderID, OrderDate, FORMAT(TotalDue, 'R$0.00') AS TotalDue
+FROM SalesSalesOrderHeader
+WHERE YEAR(OrderDate) = 2011 AND MONTH(OrderDate) = 9
+    AND TotalDue > 1000
+ORDER BY TotalDue DESC;
