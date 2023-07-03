@@ -100,7 +100,4 @@ Após os arquivos estarem disponíveis no Glue, iniciaram-se as transformações
 Este projeto é uma demonstração de como utilizar os serviços da AWS para realizar a ingestão e análise de dados. É importante ressaltar que existem outras abordagens e ferramentas disponíveis para alcançar resultados semelhantes, a exemplo do Lambda. A escolha da AWS e das tecnologias utilizadas foi baseada na proposta e requisitos específicos do projeto, mas outras soluções podem ser igualmente válidas, dependendo do contexto e dos objetivos do negócio.
 
 
-# Autora
-
-Jéssica S Oliveira
 
