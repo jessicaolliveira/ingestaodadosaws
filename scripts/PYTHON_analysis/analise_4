@@ -1,0 +1,65 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue import DynamicFrame
+
+
+def sparkSqlQuery(glueContext, query, mapping, transformation_ctx) -> DynamicFrame:
+    for alias, frame in mapping.items():
+        frame.toDF().createOrReplaceTempView(alias)
+    result = spark.sql(query)
+    return DynamicFrame.fromDF(result, glueContext, transformation_ctx)
+
+
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Script generated for node SalesOrderHeader
+SalesOrderHeader_node1688343657893 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_salesorderheader_csv",
+    transformation_ctx="SalesOrderHeader_node1688343657893",
+)
+
+# Script generated for node SalesOrderDetail
+SalesOrderDetail_node1688343681415 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="sales_salesorderdetail_csv",
+    transformation_ctx="SalesOrderDetail_node1688343681415",
+)
+
+# Script generated for node Amazon S3
+AmazonS3_node1688343832747 = glueContext.create_dynamic_frame.from_catalog(
+    database="brutos_caserox",
+    table_name="production_product_csv",
+    transformation_ctx="AmazonS3_node1688343832747",
+)
+
+# Script generated for node SQL Query
+SqlQuery0 = """
+SELECT d.ProductID, h.OrderDate, SUM(d.OrderQty) AS TotalOrderQty
+FROM SalesSalesOrderHeader h
+INNER JOIN SalesSalesOrderDetail d ON h.SalesOrderID = d.SalesOrderID
+INNER JOIN ProductionProduct p ON d.ProductID = p.ProductID
+GROUP BY d.ProductID, h.OrderDate
+ORDER BY TotalOrderQty DESC;
+"""
+SQLQuery_node1688343854349 = sparkSqlQuery(
+    glueContext,
+    query=SqlQuery0,
+    mapping={
+        "myDataSource": SalesOrderHeader_node1688343657893,
+        "myDataSource": SalesOrderDetail_node1688343681415,
+        "myDataSource": AmazonS3_node1688343832747,
+    },
+    transformation_ctx="SQLQuery_node1688343854349",
+)
+
+job.commit()
